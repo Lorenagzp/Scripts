@@ -28,17 +28,16 @@ readExcel <- function(xlsxFile){
 readFieldMapsExcel <- function(xlsx_list, endCol = 19, endRow=46,startRow = 2,startCol=3){
   xlsxs <- list(0)
   for (i in seq_along(xlsx_list)) {
-    mapi <- readWorksheetFromFile(xlsx_list[1], sheet = 1,header=TRUE, #we assume all have the same fixed size
+    mapi <- readWorksheetFromFile(xlsx_list[i], sheet = 1,header=TRUE, #we assume all have the same fixed size
                                         endCol = endCol, endRow=endRow,startRow = startRow,startCol=startCol)
     mapi$row <- rownames(mapi) ## Add the row number to a column
     
     #Get all values listed with the column and row corresponding
-    trial_column <- paste0("Col",endCol-startCol+1) #number of the last column corresponding to the trial
     #TODO: fix the row |col|plot order from here
-    mapi <- melt(mapi, id.vars =c("row",trial_column))
+    mapi <- melt(mapi, id.vars =c("row","X."))
     #rename the columnName column and keep just the number in the values
     colnames(mapi)[2:4] <- c("trial","col","plot")
-    mapi$col <- gsub('Col', '', long_table$col)
+    mapi$col <- gsub('X', '', mapi$col)
     #check for NA's in rows and remove those rows (they belong to an empty column in the field map)
     na_inrow <- apply(mapi, 1, function(x){any(is.na(x))}) 
     #Save the formated fieldmap in the list
@@ -47,7 +46,7 @@ readFieldMapsExcel <- function(xlsx_list, endCol = 19, endRow=46,startRow = 2,st
   
   #Now put all the different fieldmaps in one table
   rowcol_xlsxs <- do.call("rbind", xlsxs)
-  #Merge the plot and trial name
+  #Merge the plot and trial name, separate by underscore
   rowcol_xlsxs$plot <- paste(rowcol_xlsxs$plot,rowcol_xlsxs$trial, sep="_")
   #just order the columns as row |col| plot
   rowcol_xlsxs <-  rowcol_xlsxs[,c(1,3,4)]

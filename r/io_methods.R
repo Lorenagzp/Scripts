@@ -32,8 +32,9 @@ readFieldMapsExcel <- function(xlsx_list, endCol, endRow,startRow,startCol){
   for (i in seq_along(xlsx_list)) {
     mapi <- readWorksheetFromFile(xlsx_list[i], sheet = 1,header=TRUE, #we assume all have the same fixed size
                                         endCol = endCol, endRow=endRow,startRow = startRow,startCol=startCol)
-    #check for NA's in rows and remove those columns that only have NA's (they belong to an empty column in the field map)
-    mapi <- mapi[ , !apply(mapi, 2, function(x){all(is.na(x))})]  #The apply 1 | 2 parameter is to select to act in rows or columns
+    #check for NA's in rows and remove those columns that only have NA's (they belong to an empty column in the field map) or any cell starts with "."
+    #This dot filter was because in some fieldmaps the empty rows had dots
+    mapi <- mapi[ , !apply(mapi, 2, function(x){all(is.na(x))||any(grepl("^[.]", x))})]  #The apply 1 | 2 parameter is to select to act in rows or columns
     #Now just fix the column name of the trial identifier column. Expected to be the last column (tail function used)
     colnames(mapi)[colnames(mapi)==tail(colnames(mapi),n=1)] <- "trial"
     mapi$row <- rownames(mapi) ## Add the row number to a column

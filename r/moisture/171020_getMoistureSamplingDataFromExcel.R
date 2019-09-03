@@ -26,8 +26,9 @@ source(file.path("C:","Dropbox","Software","Scripts","r","moisture","methods_moi
 #set WDir
 setwd("C://Dropbox//Software//Scripts//r//moisture")
 
-file="C://Dropbox//Bascula (1)//Muestras suelo//AF//AF-710COMPASS.xlsx"
-trial <- "710"
+#file="C://Dropbox//Bascula (1)//Muestras suelo//AF//AF-710COMPASS.xlsx"
+file= choose.files(multi=FALSE)
+trial <- "esc"
 col_names<-c('id',
               'depth',
               'canType',
@@ -37,13 +38,13 @@ col_names<-c('id',
               'moisture')
 colTypes <- c('numeric', 'character','numeric', 'numeric','numeric','numeric','numeric')
 ##Check this for every excel read
-startRow<- 6 #Skip the fisrt 5 rows because it has other ancillary data
-startSheet <- 2
-endSheet <- 10
+startRow<- 1 #Skip the fisrt 5 rows because it has other ancillary data
+startSheet <- 1
+endSheet <- 20
 endCol <- 7
-endRow <- 66
+endRow <- 101
 
-csvfile <- "C://Dropbox//Bascula (1)//Muestras suelo//AF//AF-710COMPASS.csv"
+csvfile <- "C://Dropbox//AF___esc____moisture.csv"
 
 ################################# END INPUTS
 
@@ -58,8 +59,8 @@ moistData <-mData[[1]]
 #Calculate water table  based on the moisture frome each measurement
 samplings = length(dates)
 #Use next line to calculate moisture if it is not in the tables
-#moistTable1 <- calculateMoist(moistData)
-waterLayerTable <- calculateWLayer(moistTable1,dates)
+#moistData1 <- calculateMoist(moistData)
+waterLayerTable <- calculateWLayer(moistData,dates)
 
 ##Bind all samplings in one table (stack the rows, keep the columns)
 wLTable <- Reduce(rbind,waterLayerTable)

@@ -1,7 +1,6 @@
 #functions for image processinh
 
 require(raster)
-
 #Para agarrar las 4 bandas de reflectancia de la sequoia y unirlas en un archivo
 #Utiliza el nombre base para cargar las bandas con su nombre
 stackSeq <- function(name,path,ext){
@@ -37,7 +36,6 @@ stackRedge <- function(name,path,ext){
 
 
 require(rgdal)
-
 ##### Creo que los de leer shp no est?n funcionando
 # Read the feature class
 get_feature <- function(feature,database) {readOGR(dsn=database,layer=feature)}
@@ -111,7 +109,7 @@ slantrange3bandStack <- function(imgBasename, wd)
   })
 }
 
-###########Function to execute the top 5% mean value. Saves PDF with plots on default working directory
+###########Function to execute the top 5% mean value. Saves PDF with plots on default working directory. For a roi with rich strip (FR) and AP, AS (Farmer and sensor area) 
 ## INPUTS
 #NDVI_img: image full filename, including path
 #roi:  (needs to contain a field "area" that identifies the area, and the ruch strip should have the "FR" value)

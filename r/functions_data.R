@@ -136,9 +136,7 @@ sepatateFirstColumn521 <- function(table,IDFieldName){
 }
 
 ##function to join a set of text files with the same structure to one single table, stacking them one after another (ordering the file names) and saves to csv file 
-
 require("gtools")
-
 join_txt_files <- function(workingdirectory,pattern="*\\.txt"){
   
   temp = mixedsort(list.files(workingdirectory,pattern=pattern)) # read the filenames and order them

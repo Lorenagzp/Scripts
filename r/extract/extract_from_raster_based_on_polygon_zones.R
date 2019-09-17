@@ -23,7 +23,7 @@
 
 #### setwd() You can set the Working directory to the source file location
 #### Get functions and libraries
-source("functions_extract.R") #Check that this is in the working directory
+source("functions_extract.R") #Check that this file is in the working directory
 #require(raster)
 
 tryCatch({ ## Put it all inside a handle error function
@@ -69,7 +69,7 @@ tryCatch({ ## Put it all inside a handle error function
         ## Extract each raster
         for (r_file in r_list) {
           ####EXTRACT#### 
-          print(paste("Processing... ",r_file))
+          print(paste("Processing...using =Name= as ID field... ",r_file))
           extractThis(r_file,zones, outFolder,ID_field ="Name",fun = mean,buf)
         }
       }
@@ -77,6 +77,7 @@ tryCatch({ ## Put it all inside a handle error function
       if (in_mode == 3){ #### Ask for Raster file ####
         ####EXTRACT####
         r_file <- askRaster() #Get th raster name
+        print(paste("Processing...using =Name= as ID field... ",r_file))
         ## Run extraction and saves output, indicate statistic
         extractThis(r_file,zones, outFolder,ID_field ="Name", fun = mean,buf)
 

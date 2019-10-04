@@ -14,11 +14,13 @@
 ####    + raster
 ####    + vector
 ####
-####    - Indicate the selected statistics
-####    - The statistic table outputs are located at in the root folder of the raster location
+####    - Indicate:
+####    - the selected statistics
+####    - ID Field name
+####    - And outputs location
 ####
 #### For  the outputs:
-####  + individual file per raster with all statistics
+####  + CSV file per raster with all bands plot-values
 ####  + datafile with all the bands and dates extracted per field
 
 

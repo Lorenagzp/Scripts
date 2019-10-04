@@ -11,7 +11,7 @@
 ################### Functions
 source(file.path("C:","Dropbox","Software","Scripts","r","functions_ImgProcessing.R", fsep = .Platform$file.sep))
 
-data############### Script
+############### Script
 tryCatch({
   #Call function with the images as parameters
   print ("################# Inicio de script ##################")
@@ -27,7 +27,7 @@ tryCatch({
   name <- basename(args[1])
   ext <- ".tif"
   name<-gsub(ext, "", name)
-  ##Base image name of all the bands (separate by the "_" and get the first element)
+  ##Base image name of all the bands (separate by the "_" and get the first element) ej Imagename: "basename_transparent_reflectance_green.tif"
   name <- unlist(strsplit(name,"_"))[1]
   ## STACK BANDS OF SEQUAOIA:
   s <- stackSeq(name,path,ext)

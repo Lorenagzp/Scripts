@@ -65,38 +65,11 @@ waterLayerTable <- calculateWLayer(moistData,dates)
 ##Bind all samplings in one table (stack the rows, keep the columns)
 wLTable <- Reduce(rbind,waterLayerTable)
 
-##FORMATTING
-#Format the headers (use if needed)
-# wLTable$depth <- gsub('0-15', '1w', wLTable$depth) #replace the depth by an ordered index
-# wLTable$depth <- gsub('15-30', '2w', wLTable$depth) #replace the depth by an ordered index
-# wLTable$depth <- gsub('30-60', '3w', wLTable$depth) #replace the depth by an ordered index
-# wLTable$depth <- gsub('60-90', '4w', wLTable$depth) #replace the depth by an ordered index
-wLTable$depth <- gsub('0-15', 'depth1', wLTable$depth) #replace the depth by an ordered index
-wLTable$depth <- gsub('15-30', 'depth2', wLTable$depth) #replace the depth by an ordered index
-wLTable$depth <- gsub('30-60', 'depth3', wLTable$depth) #replace the depth by an ordered index
-wLTable$depth <- gsub('60-90', 'depth4', wLTable$depth) #replace the depth by an ordered index
-
-###########Separate the sheets name into columns (maybe change after the filtering thing?)
-#The format should be something like: dr30-11-2015_pre-conv
-#sheetname should be in a format dd-mm-yyyy and will have a prefix of 2 char: AR or DR or DT or MV (indicating the kind of sampling: after/before iirgation, etc)
-#and a suffix indicating _[pre]/[2R]/[4R]-[1/2/3/4/5]/[pb]/[conv])
-#date column - get what has the format of a date dd-mm-yyyy
-wLTable$date <- as.Date(regmatches(wLTable$sheetName, regexpr("[0-9]{2}-[0-9]{2}-[0-9]{4}", wLTable$sheetName)),"%d-%m-%Y")
-#sampling type column - what looks like [dr]/[ar]/[mv]/[dt] ... (antes de riego, despu?s, verano, trilla...)
-wLTable$irrtype <- regmatches(wLTable$sheetName, regexpr("bi|ai|ah|m1", wLTable$sheetName)) #espa?ol ar|dr|mv|dt|m1"
-#irrarea sampled column - the sampling corresponded to which irrigation instance: pre(siembra), 4R(4 riegos) or 2R(2 riegos)
-wLTable$irrarea <- gsub('_', '',regmatches(wLTable$sheetName, regexpr("_[0-9A-Za-z]+", wLTable$sheetName)))
-#irrigation sampled column - weather its the first, second.. irrigation etc
-wLTable$irrnum <- gsub('-', '',regmatches(wLTable$sheetName, regexpr("-[0-9A-Za-z]+$", wLTable$sheetName)))
-
 #check for NA's in rows
 na_inrow <- apply(wLTable, 1, function(x){any(is.na(x))}) # logical vector of the rows with any NA's
 #wLTable <- wLTable[complete.cases(wLTable), ] #This iis to remove any row that has a NA on it.
 #keep only the rows that dont have NA's and their treatment correspond to the performed sampling
 wLTable <- wLTable[!na_inrow, ]
-
-#Formate the date column to format the axis labels in ggplot
-wLTable$date <- as.POSIXct(wLTable$date)
 
 #write the final table to CSV if you want to save to text file
 write.csv(wLTable,csvfile, row.names=FALSE)

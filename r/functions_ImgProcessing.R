@@ -80,6 +80,31 @@ multibandStack6 <- function(b1,b2,b3,b4,b5,b6,roi)
   })
 }
 
+#require(rgdal)
+#require(raster)
+#Script to unstack the Multispectra bands from the MCA 3-band-pack
+multibandUnStack <- function(img_3) 
+{
+  tryCatch({
+    print(paste("Dividir primeras 3 bandas",img_3))
+    wd<-dirname(normalizePath(img_3))
+    #print(wd)
+    setwd(wd)
+    #Img basename without extention
+    imgBasename<-gsub(".tif", "", img_3)
+    #print(imgBasename)
+    #separate the bands
+    img1=raster(img_3, band = 1)
+    img2=raster(img_3, band = 2) 
+    img3=raster(img_3, band = 3) 
+    #Write the 3 tif to disk
+    writeRaster(img1, file=paste(imgBasename,"_1.tif",sep = ""),datatype='INT2U',format="GTiff",overwrite=FALSE)
+    writeRaster(img2, file=paste(imgBasename,"_2.tif",sep = ""),datatype='INT2U',format="GTiff",overwrite=FALSE)
+    writeRaster(img3, file=paste(imgBasename,"_3.tif",sep = ""),datatype='INT2U',format="GTiff",overwrite=FALSE)
+    print(paste("Imagen escrita: ",imgBasename,".tif",sep = ""))
+  })
+}
+
 #Function multibandStack
 slantrange3bandStack <- function(imgBasename, wd) 
 {
@@ -161,11 +186,6 @@ getTop5percInsideROIandRemoveFR <- function (i,roi){
   
 }
 
-## Choose file interactively | *tif file
-chooseTif <- function() {
-  choose.files(default = "", caption = "Selecciona la imagen",
-               multi = FALSE, filters = matrix(c("tif", "*.tif")),
-               index = nrow(Filters))}
 
 ### function to separate the files from the thermal imagery that correspond to a specific area, based on the autopano mosaic file.
 ### The output folder is created based on the name of the autopano file, at the same level as the folder of the images
@@ -247,3 +267,54 @@ get_filenames_from_pano_file_slantrange3 <- function(pano_file_name){
   )
   message("moved a total of ", total, " images to: ", full_output_folder)
 }
+
+#####################################################################################################################################
+#### Imageraster calc
+#####################################################################################################################################
+#Function Kelvin 100 to raster
+k2cel <-function(x){(x/100)-273.15}
+
+######################################################################################################################################
+#### Save and load images
+######################################################################################################################################
+## Choose file interactively | *tif file
+chooseTif <- function() {
+  choose.files(default = "", caption = "Selecciona la imagen",
+               multi = FALSE, filters = matrix(c("tif", "*.tif")),
+               index = nrow(Filters))}
+
+## Choose multiple files interactively | *tif file
+chooseTifs <- function() {
+  choose.files(default = "", caption = "Selecciona la imagen",
+               multi = TRUE, filters = matrix(c("tif","tiff", "*.tif", "*.tiff")),
+               index = nrow(Filters))}
+
+
+#function to save Gtiff Int to disk
+tiffSaveInt <- function(img, name) 
+{
+  tryCatch({
+    #Write the tif to disk
+    writeRaster(img, file=name,datatype='INT2U',format="GTiff",overwrite=FALSE)
+  })
+}
+
+
+#function to save Gtiff float to disk
+tiffSaveFloat <- function(img, name) 
+{
+  tryCatch({
+    #Write the tif to disk
+    writeRaster(img, file=name,datatype='FLT4S',format="GTiff",overwrite=FALSE)
+  })
+}
+
+#function to save Gtiff float to disk
+pasteExt <- function(basename, ext) 
+{
+    #PAste name and extention
+    name=paste0(basename,ext)
+
+  return(name)
+}
+

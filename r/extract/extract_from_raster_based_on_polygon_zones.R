@@ -23,7 +23,7 @@
 
 
 #### Get functions and libraries
-source("F:\\Dropbox\\Software\\Scripts\\r\\extract\\functions_extract.R") #Check that this file is in the working directory
+source("F:\\Dropbox\\Software\\Scripts\\r\\extract\\functions_extract.R") #Check that this file location
 #require(raster)
 
 ## Ask user where to put the output tables

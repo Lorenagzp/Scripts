@@ -48,7 +48,7 @@ extractThis <- function(r_file,zones, outFolder, ID_field ="Name",fun=mean,buf=0
     zones <- buffer(zones, width = buf, dissolve= FALSE)
   }
   ## With this we get a table with the values for all the plots and bands
-  table <- r$extract(zones, df=TRUE, fun=fun) #Perform the extraction with the selected statistic function
+  table <- r$extract(zones, df=TRUE, fun= function(x) fun(x, na.rm = TRUE)) #Perform the extraction with the selected statistic function, remove NA values
   ## Set ID names from the shapefile
   table$ID_sp <- zones@data[,ID_field] 
   #Save to disk

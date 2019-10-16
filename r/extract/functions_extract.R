@@ -73,7 +73,7 @@ Q3_na <- function(x) quantile(x, prob=c(0.75), na.rm = TRUE)
 #######################################################################
 
 #### Extract vales from images
-extractThis <- function(r_file,zones, outFolder, ID_field ="Name",func=median_na,buf=0){
+extractThis <- function(r_file,zones, outFolder, ID_field ="Name",func=median_na,buf=0,small=FALSE){
   ##   Imports raster as stack to allow multiple bands, uses "velox" object to make raster operations faster
   r <- velox(stack(r_file))
   #Set output name like the raster (remove extension and path from), save in the output folder
@@ -84,7 +84,7 @@ extractThis <- function(r_file,zones, outFolder, ID_field ="Name",func=median_na
     zones <- buffer(zones, width = buf, dissolve= FALSE)
   }
   ## With this we get a table with the values for all the plots and bands
-  table <- r$extract(zones, df=TRUE, fun= func) #Extract and summarize the function, remove NA values. Returns a dataframe
+  table <- r$extract(zones, df=TRUE, fun= func, small=small) #Extract and summarize the function, remove NA values. Returns a dataframe
   ## Set ID names from the shapefile IF field
   table$ID_sp <- zones@data[,ID_field] 
   #Save to disk

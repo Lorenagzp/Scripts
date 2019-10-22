@@ -22,14 +22,15 @@
 ####
 #### For  the outputs:
 ####  + CSV file per raster with all bands plot-values
-####  + datafile with all the bands and dates extracted per field
 
 
 #### Get functions and libraries
 ## First set the working directory to the location of this script
 #setwd("C:\\")
 source("functions_extract.R") #Check that the function file is in the same Working directory
+# It needs this packages to be installed
 #require(raster)
+#require(velox)
 
 #### Ask user where to put the output tables
 #outFolder <- choose.dir(caption = "Select folder to save output tables")
@@ -86,7 +87,7 @@ tryCatch({ ## Put it all inside a handle error function
         ## Ask user for Raster folder
         rFolder <- choose.dir(caption = "Select folder that contains the rasters to extract")
         #list the rasters inside the folder. Return full path name
-        r_list <- list.files(path = rFolder, full.names= TRUE, pattern = "\\.tif$|\\.bsq$|\\.tiff$") # Select Tif or BSQ for example
+        r_list <- list.files(path = rFolder, full.names= TRUE, pattern = "\\.tif$|\\.bsq$|\\.tiff$|\\.dat$") # Select Tif or BSQ for example
         ## Extract each raster
         for (r_file in r_list) {
           ####EXTRACT#### 

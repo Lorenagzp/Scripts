@@ -47,7 +47,7 @@ func <- median_na ## Summarize by median, remove NA values
 ####Field in the shp table to use as identifier of the extracting features
 ID_field <- "Name"
 
-#### Start of script
+#### Start of script, will deploy the menu of options
 tryCatch({ ## Put it all inside a handle error function
   
     ## Shapefile
@@ -63,7 +63,7 @@ tryCatch({ ## Put it all inside a handle error function
       ####EXTRACT####
       # run for every item in te list
       for (i in 1:nrow(inputList)) {
-        print(paste("Processing list... ",i))
+        print(paste("Processing list... ",inputList[i,1]))
         extractThis(inputList[i,1],shapefile(inputList[i,2]), inputList[i,3], inputList[i,4],func,as.double(inputList[i,5])) ## r_file,zones, outFolder, ID_field, func, buf
       }
       

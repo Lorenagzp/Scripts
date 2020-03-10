@@ -16,6 +16,7 @@ setwd(Folder)
 fgdb = file.path("C:","Dropbox", "data","AG","FR","AF_FR.gdb", fsep = .Platform$file.sep)
 roi_name= "rey190118gsa_1"                                     ########### This is where you select the ROI of the areas of interest ######### %$"#
 crop_roi <- readOGR(dsn = fgdb, layer = roi_name)
+# crop_roi <- shapefile(choose.files()) ## Interactive selection
 #choose image file                                            ########### This is where you select the image ######### %$"#
 i <- chooseTif()
 

@@ -14,14 +14,16 @@ require(raster) # To open the shapefile
 ## Functions
 
 tryCatch({
-  #### Read ROI polygon
+  #### Read ROI polygon shapefile
   #### This is where you select the ROI of the areas of interest.
   #### Consider giving a margin in the roi to include images just outide the border that cover well the area
-  roi <- shapefile(choose.files(default = "", multi = FALSE, caption = "Select the input  *.shp file", filters = matrix(c("Shapefile","*.shp"),1,2, byrow= TRUE)))  # Returns selected shapefile
+  roi_shp <- choose.files(default = "", multi = FALSE, caption = "Select the input  *.shp file", filters = matrix(c("Shapefile","*.shp"),1,2, byrow= TRUE))
+  roi <- shapefile(roi_shp)  # Returns selected shapefile
+  message("Selected ROI: ",roi_shp)
+  roi_name <- "roi" # Name to call the subset images.
   #Reproject to have on the same CRS as the images (assumed to be WGS84)
   roi <- spTransform(roi,CRS("+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"))
-  roi_name <- "roi" # Name to call the subset images.
-  
+
   ##Picture folder location <-> WD
   wd <- choose.dir(caption="Select the folder with the imagery. (Recursive = TRUE)")
   message(sprintf("WD: %s",wd)) #Print which folder was selected as wd
@@ -76,20 +78,20 @@ tryCatch({
   #in_poly_img_list <- as.character(in_poly_img$imgfileName) #list of file names that match
   #in_poly_img_list <- as.character(in_poly_img$`imgfileName[filter2[, 1]]`) #list of file names that match. . ^Having some troubles matching the data types of the functions
   in_poly_img_list <- as.character(in_poly_img$`meta$SourceFile`) #list of file names that match . ^Having some troubles matching the data types of the functions
-  message(length(in_poly_img_list)," images are inside the selected polygon ",roi_name)
+  message(length(in_poly_img_list)," images are inside the selected polygon...")
   #Write to savefolder the list of images inside the polygon
   write.table(in_poly_img_list, file.path(savefolder,"images_in_polygon.csv"),row.names = FALSE,quote = FALSE)
-  message(sprintf("Saved list of images to copy in %s",file.path(savefolder,"images_in_polygon.csv"))) ## THis will include only band 1 for redEdge
+  message(sprintf("Saved list of images to copy in %s ...",file.path(savefolder,"images_in_polygon.csv"))) ## THis will include only band 1 for redEdge
   
   #Copy the images inside ROi to the new folder
-  message("Will start to copy the images inside the polygon...")
+  message("Will start to copy the images that fall inside the polygon...")
   if (cam == 1){## For the RedEdge, I worked only with one band, but want to move all the bands to the new folder
     
     ## copy all 5 bands of the redEdge: iterate the band index 1 to 5
     for (i in 1:5) {
       files_copy <- file.copy(gsub("_1\\.tif$",paste0("_",i,".tif"),in_poly_img_list), savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
       #file.remove (gsub("_1.",paste0("_",i,"."),in_poly_img_list)) #### you can DELETE after copy to "MOVE" the files
-      message(sum(files_copy)," files from band ",i," copied to ", savefolder, " folder")
+      message(sum(files_copy)," files from band ",i," copied to ", savefolder, " folder...")
     }
     
   } else if( cam ==2){ ## For other camera, copy all the files found
@@ -97,7 +99,7 @@ tryCatch({
     ## Copy all based on the list to the nes folder
     files_copy <- file.copy(in_poly_img_list, savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
     #file.remove (in_poly_img_list) #### you can DELETE after copy to "MOVE" the files
-    message(sum(files_copy)," files copied to ", savefolder, " folder")
+    message(sum(files_copy)," files copied to ", savefolder, " folder...")
   }
   
   #rudimentary view features

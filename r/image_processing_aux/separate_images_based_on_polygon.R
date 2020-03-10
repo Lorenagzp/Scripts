@@ -1,6 +1,7 @@
 ## Script to get the images corresponding to the area inside a polygon from a folder.
 ## Assuming the Coordinate system of the geotagg is WGS84
-## For RedEdge camera imagery
+## For RedEdge camera imagery, may need tuning for other metadata structure,i.e. select the name of the lat long columns
+## This will get the rectangular extent of the ROI.
 #April 2019
 ############################issues arrised. Check code
 
@@ -12,7 +13,7 @@ require(raster) # To open the shapefile
 
 ## Functions
 
-trycatch({
+tryCatch({
   #### Read ROI polygon
   #### This is where you select the ROI of the areas of interest.
   #### Consider giving a margin in the roi to include images just outide the border that cover well the area
@@ -23,7 +24,13 @@ trycatch({
   
   ##Picture folder location <-> WD
   wd <- choose.dir(caption="Select the folder with the imagery. (Recursive = TRUE)")
+  message(sprintf("WD: %s",wd)) #Print which folder was selected as wd
   setwd(wd) #set the image folder as the working directory
+  
+  ## copy in-polygon images to a separate folder
+  #dir.create(file.path(wd,roi_name, fsep = .Platform$file.sep)) #create folder with the roi name in the same location as the image folder directory
+  savefolder <- choose.dir(caption="Select the folder to save the imagery") #Choose folder interactively
+  message(sprintf("save folder: %s",savefolder)) #Print which folder was selected as wd
   
   ## Choose the type of images to work with
   cam <- menu(c("RedEdge","Other"),title = "Choose the type of images to work with", graphics = TRUE)
@@ -32,7 +39,7 @@ trycatch({
     
     ## List images in folder. *.tif type is used.
     #you can use the recursive = TRUE parameter if you want to read the subdirectories
-    pictures <- list.files(wd,pattern = "\\_1.tif$",recursive = TRUE) #get filenames of the first band
+    pictures <- list.files(wd,pattern = "_1\\.tif$",recursive = TRUE) #get filenames of the first band
     
   } else if( cam ==2){
     
@@ -40,10 +47,12 @@ trycatch({
     #you can use the recursive = TRUE parameter if you want to read the subdirectories
     pictures <- list.files(wd,pattern = "\\.tif$",recursive = TRUE) #get filenames of the first band
     
-  }
+    }
   
   ##Know the position of each picture
+  message("Will start to read the images metadata... this may take a while if there are too many images...")
   meta <- exif_read(pictures) #get metadata from files. This takes up to 11 min if there are ~11K pictures from RedEdge camera...
+  #write.table(do.call("rbind", lapply(meta$removecolumns that are multimplevalues per cell, as.data.frame)) ,"metadata_allimg.csv") TODO #Save metadata to CSV file in disk in WD
   ##to do: remove images with NA (if error ocurred)++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ EDITING
   ## Get the coordinates and image name for each picture
   imgfileName <- as.data.frame(meta$SourceFile) #filenames of each image
@@ -54,7 +63,7 @@ trycatch({
   # lat_long <- lat_long[filter[,1],] #Avoid frames with NAs
   ######### This in not working fine apparently but give it a try... filter2 <- !is.na(lat_long)
   # lat_long <- lat_long[filter2[,1],] #Avoid frames with NAs
-  #imgfileName <- as.data.frame(imgfileName[filter2[,1]]) # Remove the records with NA's in the coordinates
+  #imgfileName <- as.data.frame(imgfileName[filter2[,1]]) # Remove the records with NA's in the coordinates if there were incomplete captures or errors
   
   ##to do: remove images with NA (if error ocurred) +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ Editing ends
   #### Create points based on the coordinates
@@ -68,34 +77,38 @@ trycatch({
   #in_poly_img_list <- as.character(in_poly_img$`imgfileName[filter2[, 1]]`) #list of file names that match. . ^Having some troubles matching the data types of the functions
   in_poly_img_list <- as.character(in_poly_img$`meta$SourceFile`) #list of file names that match . ^Having some troubles matching the data types of the functions
   message(length(in_poly_img_list)," images are inside the selected polygon ",roi_name)
-  
-  ## copy in-polygon images to a separate folder
-  dir.create(file.path(wd,roi_name, fsep = .Platform$file.sep)) #create folder with the roi name in the same location as the image folder directory
+  #Write to savefolder the list of images inside the polygon
+  write.table(in_poly_img_list, file.path(savefolder,"images_in_polygon.csv"),row.names = FALSE,quote = FALSE)
+  message(sprintf("Saved list of images to copy in %s",file.path(savefolder,"images_in_polygon.csv"))) ## THis will include only band 1 for redEdge
   
   #Copy the images inside ROi to the new folder
+  message("Will start to copy the images inside the polygon...")
   if (cam == 1){## For the RedEdge, I worked only with one band, but want to move all the bands to the new folder
     
-    ## copy all 5 bands
+    ## copy all 5 bands of the redEdge: iterate the band index 1 to 5
     for (i in 1:5) {
-      files_copy <- file.copy(gsub("_1.",paste0("_",i,"."),in_poly_img_list), roi_name) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
+      files_copy <- file.copy(gsub("_1\\.tif$",paste0("_",i,".tif"),in_poly_img_list), savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
       #file.remove (gsub("_1.",paste0("_",i,"."),in_poly_img_list)) #### you can DELETE after copy to "MOVE" the files
-      }
+      message(sum(files_copy)," files from band ",i," copied to ", savefolder, " folder")
+    }
     
-  } else if( cam ==2){
+  } else if( cam ==2){ ## For other camera, copy all the files found
     
     ## Copy all based on the list to the nes folder
-    files_copy <- file.copy(in_poly_img_list, roi_name) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
+    files_copy <- file.copy(in_poly_img_list, savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
     #file.remove (in_poly_img_list) #### you can DELETE after copy to "MOVE" the files
+    message(sum(files_copy)," files copied to ", savefolder, " folder")
   }
+  
+  #rudimentary view features
+  pdf(file.path(savefolder,"images_layout.pdf"))
+  plot(roi,main=savefolder)
+  plot(in_poly_img,add=TRUE)
+  #plot(img_geotagg,add=TRUE)
+  dev.off()
 
-  message(sum(files_copy)," files copied to ", roi_name, " folder")
-
+  message("Finished!")
   },
   error = function(e){print(c("Se produjo un error: ",e$message))},
   warning = function(e){print(paste("Hay advertencias: ", e$message))}
 )
-
-
-#view features
-#plot(roi)
-#plot(img_geotagg,add=TRUE)

@@ -1,0 +1,68 @@
+#################################Ejercicio script para generar tablas de relaciones de  protenia con indices vegetativos promediados por campo#############################################################
+##############################################################################################
+library(ggplot2)
+
+## Funciones
+lm_eq <- function(mean_table,x,y){
+  
+  m <- lm(y ~ x, mean_table);
+  
+  eq <- substitute((y) == a + b %.% (x)*","~~(r)^2~"="~r2, 
+                   
+                   list(a = format(unname(coef(m)[1]), digits = 2),
+                        b = format(unname(coef(m)[2]), digits = 2),
+                        r2 = format(summary(m)$r.squared, digits = 3)))
+  
+  as.character(as.expression(eq));
+}
+
+##definir carpeta de trabajo
+setwd("C://Users//Cynthia//Desktop//Practicas Alfredo//2_tablas_mean")
+
+## Leer una tabla
+Tablas_ej1 <- read.csv("C://Users//Cynthia//Desktop//Practicas Alfredo//1_tablas//Tabla_VIs_by_column_by_date.csv")
+
+## prueba sacar promedioo ##
+#n <- mean(Tablas_ej1$WG)
+
+##Prueba correlación 2 columnas
+#cor(Tablas_ej1[c("arenal","fimbres")])
+#median(DG) sacar mediana
+
+#comentario diferentes maneras de llamar los datos.
+## Tablas_ej1[filas,columnas]
+#### Obtener una columna de la tabla, por nombre de la columna
+## Tablas_ej1$DG
+#### Obtener subconjunto de columnas y filas de la tabla
+## Tablas_ej1[c(1:20),c(3:16)] # con el número de filas y columnas
+##Tablas_ej1[Tablas_ej1$Campos=="Arenal",c("WG","DG")] # con el nombre
+##aggregate(Tablas_ej1,list(Tablas_ej1[Tablas_ej1$Campos == c("WG","DG"]),mean) <-- error 
+
+## Promediar todos los registros que pertenezcan al mismo campo
+mean_table <- aggregate(Tablas_ej1,list(Tablas_ej1$Campos),mean)
+mean_table$Campos <- mean_table$Group.1 #Volver a rellenar la columna de campos 
+mean_table$rich_strip <- NULL
+#################### Gráficas de correlación
+pdf("proteina_vs indices.pdf") #Guardar en un pdf
+message(sprintf("Se iniciara la generación de la gráfica desde columna %i hasta %i", 4,98))
+for (i in 4:98) { ## Inicio del ciclo For, usar las columnas 2 -98
+    ##Definir variables para las gráficas
+  x <- mean_table[,i]
+  xlab <- names(mean_table)[i]
+  xtext <- mean(x,na.rm =TRUE)
+  y <- mean_table$N_PERCENT
+  ylab <- "Protein (N%)"
+  graph_title <- sprintf("Correlación proteína vs %s", xlab)
+  
+  #Parte gráfica
+  ##sobreponer la linea de regresion y los colores por grupo
+  p1 <- ggplot(mean_table, aes( x= x, y = y ))
+  p1 <- p1 + geom_point(aes()) + geom_smooth(method = lm, se = FALSE)
+  p1 <- p1 + geom_point(aes(colour = Campos))
+  p1 <- p1 + xlab(xlab) + ylab(ylab)+ ggtitle(graph_title) #Asignar etiquetas titulo y ejes
+  p1 <- p1 + geom_smooth(method = "lm", se=FALSE, formula = y ~ x) 
+  p1 <- p1 + geom_text(x= xtext, y = 1.77, label = lm_eq(mean_table,x,y), parse = TRUE)
+  print(p1) #Imprimir cada gráfica
+} ## Fin del ciclo For
+dev.off() #Cerrar PDF
+#################### Gráficas de correlación

@@ -33,8 +33,8 @@ source("functions_extract.R") #Check that the function file is in the same Worki
 #require(velox)
 
 #### Ask user where to put the output tables
-#outFolder <- choose.dir(caption = "Select folder to save output tables")
-outFolder <- ("C:\\temp\\r") # Set path fix
+outFolder <- choose.dir(caption = "Select folder to save output tables")
+#outFolder <- ("C:\\temp\\r") # Set path fix
 
 #### summarize using the selected function ("na" stands for: remove NA values)
 # See the functions_extract.R
@@ -94,6 +94,8 @@ tryCatch({ ## Put it all inside a handle error function
           ####EXTRACT#### 
           print(paste("Processing raster in folder... ",r_file))
           extractThis(r_file,zones, outFolder,ID_field,func,buf)
+          #extractThis(r_file,zones, outFolder,ID_field,func,buf,band_names=c("ID","Blue","Red","Green","Red Edge","NIR")) #pass the band_names for the output table - RedEdge cam
+          #extractThis(r_file,zones, outFolder,ID_field,func,buf,band_names=c("ID","celsius")) #pass the band_names for the output table - Temperature
         }
       }
       

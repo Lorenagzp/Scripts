@@ -2,6 +2,7 @@
 ## Assuming the Coordinate system of the geotagg is WGS84
 ## For RedEdge camera imagery and any other
 ## Recursively searches pictures inside subfolders (recursive = TRUE)
+## Set for TIF FILES
 ## November 2019
 ############################issues known:
 ## + Check the "date" column name" to make sure that is the date you want to consider (eg. modify, create, update date...)
@@ -65,7 +66,7 @@ tryCatch({
                                         proj4string = CRS("+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0")) #CRS
   
   # Get points that fall inside the ROI polygon
-  in_poly_img <- raster::intersect(img_geotagg, roi) # get point candidates, that match the target ROI polygon area 
+  in_poly_img <- raster::intersect(img_geotagg, roi) # get point candidates, that match the target ROI polygon rectangular extent area 
   #in_poly_img_list <- as.character(in_poly_img$imgfileName) #list of file names that match
   #in_poly_img_list <- as.character(in_poly_img$`imgfileName[filter2[, 1]]`) #list of file names that match. . ^Having some troubles matching the data types of the functions
   #in_poly_img_list <- as.character(in_poly_img@data) #list of file names that match . ^Having some troubles matching the data types of the functions
@@ -89,10 +90,10 @@ tryCatch({
       
       ## copy all 5 bands
       for (bandn in 1:5) {
-        files_copy <- file.copy(gsub("_1\\.",paste0("_",bandn,"\\."),date_img_list), folder)
+        files_copy <- file.copy(gsub("_1\\.tif",paste0("_",bandn,"\\.tif"),date_img_list), folder)
         #the previous line can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
         #### you can DELETE after copy to "MOVE" the files
-        #file.remove (gsub("_1\\.",paste0("_",i,"\\."),date_img_list)) 
+        #file.remove (gsub("_1\\.tif",paste0("_",i,"\\.tif"),date_img_list)) 
       }
     } else if( cam ==2){
       

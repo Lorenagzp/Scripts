@@ -1,7 +1,7 @@
 ## Script to get the images corresponding to the area inside a polygon from a folder.
 ## Assuming the Coordinate system of the geotagg is WGS84
 ## For RedEdge camera imagery, may need tuning for other metadata structure,i.e. select the name of the lat long columns
-## This will get the rectangular extent of the ROI.
+## Warning: If there are repeated filenames in subfolders they will not be copied, because they will all be copied to one folder.You can run separately subfolders with identical filenames.
 #April 2019
 ############################issues arrised. Check code
 
@@ -20,9 +20,9 @@ tryCatch({
   roi_shp <- choose.files(default = "", multi = FALSE, caption = "Select the input  *.shp file", filters = matrix(c("Shapefile","*.shp"),1,2, byrow= TRUE))
   roi <- shapefile(roi_shp)  # Returns selected shapefile
   message("Selected ROI: ",roi_shp)
-  roi_name <- "roi" # Name to call the subset images.
   #Reproject to have on the same CRS as the images (assumed to be WGS84)
   roi <- spTransform(roi,CRS("+init=epsg:4326 +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs +towgs84=0,0,0"))
+  roi_name <- "roi" # Name to call the subset images.
 
   ##Picture folder location <-> WD
   wd <- choose.dir(caption="Select the folder with the imagery. (Recursive = TRUE)")
@@ -38,17 +38,13 @@ tryCatch({
   cam <- menu(c("RedEdge","Other"),title = "Choose the type of images to work with", graphics = TRUE)
   ## Proceed depending on the type of imagery
   if (cam == 1){
-    
     ## List images in folder. *.tif type is used.
     #you can use the recursive = TRUE parameter if you want to read the subdirectories
     pictures <- list.files(wd,pattern = "_1\\.tif$",recursive = TRUE) #get filenames of the first band
-    
   } else if( cam ==2){
-    
     ## List images in folder. *.tif type is used.
     #you can use the recursive = TRUE parameter if you want to read the subdirectories
     pictures <- list.files(wd,pattern = "\\.tif$",recursive = TRUE) #get filenames of the first band
-    
     }
   
   ##Know the position of each picture
@@ -83,32 +79,29 @@ tryCatch({
   write.table(in_poly_img_list, file.path(savefolder,"images_in_polygon.csv"),row.names = FALSE,quote = FALSE)
   message(sprintf("Saved list of images to copy in %s ...",file.path(savefolder,"images_in_polygon.csv"))) ## THis will include only band 1 for redEdge
   
-  #Copy the images inside ROi to the new folder
-  message("Will start to copy the images that fall inside the polygon...")
-  if (cam == 1){## For the RedEdge, I worked only with one band, but want to move all the bands to the new folder
-    
-    ## copy all 5 bands of the redEdge: iterate the band index 1 to 5
-    for (i in 1:5) {
-      files_copy <- file.copy(gsub("_1\\.tif$",paste0("_",i,".tif"),in_poly_img_list), savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
-      #file.remove (gsub("_1.",paste0("_",i,"."),in_poly_img_list)) #### you can DELETE after copy to "MOVE" the files
-      message(sum(files_copy)," files from band ",i," copied to ", savefolder, " folder...")
-    }
-    
-  } else if( cam ==2){ ## For other camera, copy all the files found
-    
-    ## Copy all based on the list to the nes folder
-    files_copy <- file.copy(in_poly_img_list, savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
-    #file.remove (in_poly_img_list) #### you can DELETE after copy to "MOVE" the files
-    message(sum(files_copy)," files copied to ", savefolder, " folder...")
-  }
-  
   #rudimentary view features
   pdf(file.path(savefolder,"images_layout.pdf"))
   plot(roi,main=savefolder)
   plot(in_poly_img,add=TRUE)
   #plot(img_geotagg,add=TRUE)
   dev.off()
-
+  
+  #Copy the images inside ROi to the new folder
+  message("Will start to copy the images that fall inside the polygon...")
+  if (cam == 1){## For the RedEdge, I worked only with one band, but want to move all the bands to the new folder
+    ## copy all 5 bands of the redEdge: iterate the band index 1 to 5
+    for (i in 1:5) {
+      files_copy <- file.copy(gsub("_1\\.tif$",paste0("_",i,".tif"),in_poly_img_list), savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
+      #file.remove (gsub("_1.",paste0("_",i,"."),in_poly_img_list)) #### you can DELETE after copy to "MOVE" the files
+      message(sum(files_copy)," files from band ",i," copied to ", savefolder, " folder...")
+    }
+  } else if( cam ==2){ ## For other camera, copy all the files found
+    ## Copy all based on the list to the nes folder
+    files_copy <- file.copy(in_poly_img_list, savefolder) #can give this error "more 'from' files than 'to' files" if.. (when the folder is created one level upper than necessary {OR IF SOME IMAGES WERE MOVED?})
+    #file.remove (in_poly_img_list) #### you can DELETE after copy to "MOVE" the files
+    message(sum(files_copy)," files copied to ", savefolder, " folder...")
+  }
+  
   message("Finished!")
   },
   error = function(e){print(c("Se produjo un error: ",e$message))},

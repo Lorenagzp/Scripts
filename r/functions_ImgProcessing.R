@@ -160,10 +160,13 @@ getTop5percInsideROIandRemoveFR <- function (i,roi){
   msk <- mask(img_c, roi) ##inverse=TRUE
   
   #Plot
-  print("Values before the 5% top treshold")
+  #Mean pixel value
+  meanImgTotal <- cellStats(msk, stat='mean', na.rm=TRUE)
+  print(paste("mean NDVI values from the image",meanImgTotal)) # mean NDVI values from the image
   hist(msk)
-  plot(msk)
+  plot(msk,main= sprintf("mean of total NDVI values from the image %.4f",meanImgTotal))
   plot(roi,add=TRUE)
+  
   
   q95 <- quantile(msk, c(.95))
   sprintf("Quantile 95perc: %.4f",q95) #Print quantile break
@@ -173,16 +176,16 @@ getTop5percInsideROIandRemoveFR <- function (i,roi){
   img95[img95 < q95] <- NA
   #get the mean value from the filtered image
   print("Get mean value of top 5% pixels in the histogram...")
-  meanImg <- cellStats(img95, stat='mean', na.rm=TRUE)
+  meanImg5Top <- cellStats(img95, stat='mean', na.rm=TRUE)
   plot(img95,main= sprintf("Quantile 95perc: %.4f",q95))
-  hist(img95, main= sprintf("mean of 5perc. top NDVI values from the image %.4f",meanImg))
+  hist(img95, main= sprintf("mean of 5perc. top NDVI values from the image %.4f",meanImg5Top))
   
-  print(paste("5% top NDVI values from the image",meanImg)) # 5% top NDVI values from the image
+  print(paste("5% top NDVI values from the image",meanImg5Top)) # 5% top NDVI values from the image
   
   #This stops the PDF capture
   dev.off()
   
-  return(meanImg)
+  return(meanImg5Top)
   
 }
 
@@ -222,6 +225,7 @@ separate_img_in_folder_from_pano_file <- function(pano_file_name){
     
   )
   message("moved a total of ", total, " images to: ", full_output_folder)
+  return(target_imgs) #Return the list of images moved
 }
 
 ### function to separate the files from the slantrange 3band stacked imagery that correspond to a specific area, based on the autopano mosaic file.

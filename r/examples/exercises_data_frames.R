@@ -161,6 +161,10 @@ library(rasterVis)
 levelplot(s) #plot raster
 library(plotKML)
 plotKML(s[[1]]) #Export to KML from R
+# Open a shapefile interactively selecting from a vindow
+shp1 <- choose.files(default = "", multi = FALSE, caption = "Select the input  *.shp file", filters = matrix(c("Shapefile","*.shp"),1,2, byrow= TRUE))
+print(paste("selected shp: ",f)) #Say which shp was selected
+#or fixed:
 shp <- shapefile("C:\\Dropbox\\data\\AE\\nut\\shp\\521__ae__plt.shp")
 plotKML(shp) #Export shapefile to KML from R
 ## Access raster values as a matrix
